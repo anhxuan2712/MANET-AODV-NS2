@@ -1,0 +1,4 @@
+# Script chạy trên Ubuntu phải dùng LF, nếu không bash/ns sẽ lỗi
+*.sh  text eol=lf
+*.tcl text eol=lf
+scenarios/**/*.txt text eol=lf
