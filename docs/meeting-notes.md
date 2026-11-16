@@ -78,3 +78,71 @@ l
 1. **Yêu cầu TV3:** Cập nhật script Tcl tích hợp trực tiếp các file kịch bản của TV4 (dùng cờ `-mob` và `-traffic` hoặc nạp tự động theo kịch bản/seed), trỏ đường dẫn xuất trace về `../trace/raw/` và tắt `macTrace`, `movementTrace`. *(Có thể tham khảo trực tiếp file `tcl/manet_aodv_base.tcl` đã được xây dựng sẵn chuẩn khung nạp)*.
 2. **Yêu cầu TV2:** Bổ sung ảnh chụp màn hình kiểm thử terminal vào `screenshots/terminal/`.
 3. **Phối hợp TV3 & TV4:** Sau khi TV3 hoàn thiện mã Tcl, TV4 tiến hành chạy thử nghiệm toàn bộ 4 kịch bản $\times$ 3 lượt chạy (tổng cộng 12 lượt mô phỏng) trên máy ảo Ubuntu để sinh bộ dữ liệu trace đưa vào `trace/raw/` bàn giao cho TV5 phân tích.
+
+
+---
+
+## Cập nhật Đánh giá lại TV3 (16/11/2026 - Tối, Sau khi hoàn thiện)
+
+- **Thời gian:** 16/11/2026 (Tối)
+- **Chủ trì review:** Nguyễn Anh Xuân (TV1 - Leader)
+- **Nội dung:** Đánh giá bản sửa đổi của Thành viên 3 (Nguyễn Phúc Vượng) qua Pull Request #4 (Commit `555e316`).
+- **Sản phẩm bàn giao cập nhật:** `tcl/manet_aodv_base.tcl` và `tcl/run_simulation.sh`.
+
+### 1. Kết quả kiểm tra đối chiếu các yêu cầu khắc phục
+
+1. **Khả năng tích hợp kịch bản của TV4: ĐẠT XUẤT SẮC (10/10)**
+   - Script tự động nhận diện và nạp đúng đường dẫn các file kịch bản của TV4: `scenarios/SC0X_speed_X/mobility_sc0X_run0Y.txt` và `traffic_cbr.txt`.
+   - Có cơ chế chặn lỗi nghiêm ngặt: Nếu thiếu file kịch bản của TV4, script sẽ báo lỗi và dừng ngay lập tức; không tự tiện sinh ngẫu nhiên làm sai lệch tính khách quan của thực nghiệm.
+   - Các biến đối tượng `$ns_`, `$node_($i)`, `$god_` khớp 100% với file do TV4 sinh ra.
+2. **Quy chuẩn lưu trữ file Trace & NAM: ĐẠT (10/10)**
+   - Đã chuyển toàn bộ đường dẫn lưu file đầu ra về đúng thư mục chuẩn `../trace/raw/` theo định dạng `trace_<sc>_run<seed>.tr` và `nam_<sc>_run<seed>.nam`.
+   - Thêm cơ chế bảo toàn dữ liệu gốc: Báo lỗi và từ chối ghi đè nếu file trace đã tồn tại (chỉ ghi đè khi có cờ `-force` chạy thử nghiệm).
+3. **Tối ưu hóa dung lượng Trace: ĐẠT (10/10)**
+   - Đã cấu hình chính xác: `macTrace OFF`, `movementTrace OFF`, chỉ giữ lại `agentTrace ON` và `routerTrace ON`. File trace sẽ rất gọn gàng, đúng trọng tâm cho TV5 phân tích AWK.
+4. **Nâng cấp Script tự động hóa (`run_simulation.sh`): ĐẠT XUẤT SẮC**
+   - Hỗ trợ linh hoạt chạy 1 lượt (`./run_simulation.sh`) hoặc nhiều lượt với seed tùy chọn (`./run_simulation.sh 1 2 3`).
+   - Tự động tạo thư mục log và lưu vết chi tiết từng lần chạy vào `../trace/logs/log_<sc>_run<seed>.txt`.
+   - Tích hợp sẵn câu lệnh AWK kiểm tra nhanh số gói CBR gửi (`AGT s`) và nhận (`AGT r`), cảnh báo nếu kịch bản không nhận được gói tin nào.
+5. **Tính chuyên nghiệp & Git: ĐẠT**
+   - Commit message chuẩn chỉ: *"Add AODV MANET Tcl base script and run_simulation.sh (UDP/CBR)"*.
+
+### 2. Kết luận nghiệm thu lại Thành viên 3
+
+* **Đánh giá:** **10/10 (Xuất sắc - Nghiệm thu hoàn toàn)**.
+* **Lưu ý nhỏ:** File cũ `tcl/manet_aodv_sc01.tcl` hiện không còn sử dụng, toàn bộ nhóm sẽ dùng `tcl/manet_aodv_base.tcl` và `tcl/run_simulation.sh` làm công cụ mô phỏng chính thức.
+* **Chuyển giao giai đoạn:** Mô hình Tcl đã hoàn thiện 100% và khớp hoàn toàn với kịch bản của TV4. Chuyển giao ngay cho **TV4 (Nguyễn Minh Trí) chạy thực tế 12 lượt mô phỏng** (4 kịch bản $\times$ 3 run) trên máy ảo Ubuntu để sinh dữ liệu trace cho TV5.
+
+
+---
+
+## Cập nhật Đánh giá lại TV3 (16/11/2026 - Tối, Sau khi hoàn thiện)
+
+- **Thời gian:** 16/11/2026 (Tối)
+- **Chủ trì review:** Nguyễn Anh Xuân (TV1 - Leader)
+- **Nội dung:** Đánh giá bản sửa đổi của Thành viên 3 (Nguyễn Phúc Vượng) qua Pull Request #4 (Commit `555e316`).
+- **Sản phẩm bàn giao cập nhật:** `tcl/manet_aodv_base.tcl` và `tcl/run_simulation.sh`.
+
+### 1. Kết quả kiểm tra đối chiếu các yêu cầu khắc phục
+
+1. **Khả năng tích hợp kịch bản của TV4: ĐẠT XUẤT SẮC (10/10)**
+   - Script tự động nhận diện và nạp đúng đường dẫn các file kịch bản của TV4: `scenarios/SC0X_speed_X/mobility_sc0X_run0Y.txt` và `traffic_cbr.txt`.
+   - Có cơ chế chặn lỗi nghiêm ngặt: Nếu thiếu file kịch bản của TV4, script sẽ báo lỗi và dừng ngay lập tức; không tự tiện sinh ngẫu nhiên làm sai lệch tính khách quan của thực nghiệm.
+   - Các biến đối tượng `$ns_`, `$node_($i)`, `$god_` khớp 100% với file do TV4 sinh ra.
+2. **Quy chuẩn lưu trữ file Trace & NAM: ĐẠT (10/10)**
+   - Đã chuyển toàn bộ đường dẫn lưu file đầu ra về đúng thư mục chuẩn `../trace/raw/` theo định dạng `trace_<sc>_run<seed>.tr` và `nam_<sc>_run<seed>.nam`.
+   - Thêm cơ chế bảo toàn dữ liệu gốc: Báo lỗi và từ chối ghi đè nếu file trace đã tồn tại (chỉ ghi đè khi có cờ `-force` chạy thử nghiệm).
+3. **Tối ưu hóa dung lượng Trace: ĐẠT (10/10)**
+   - Đã cấu hình chính xác: `macTrace OFF`, `movementTrace OFF`, chỉ giữ lại `agentTrace ON` và `routerTrace ON`. File trace sẽ rất gọn gàng, đúng trọng tâm cho TV5 phân tích AWK.
+4. **Nâng cấp Script tự động hóa (`run_simulation.sh`): ĐẠT XUẤT SẮC**
+   - Hỗ trợ linh hoạt chạy 1 lượt (`./run_simulation.sh`) hoặc nhiều lượt với seed tùy chọn (`./run_simulation.sh 1 2 3`).
+   - Tự động tạo thư mục log và lưu vết chi tiết từng lần chạy vào `../trace/logs/log_<sc>_run<seed>.txt`.
+   - Tích hợp sẵn câu lệnh AWK kiểm tra nhanh số gói CBR gửi (`AGT s`) và nhận (`AGT r`), cảnh báo nếu kịch bản không nhận được gói tin nào.
+5. **Tính chuyên nghiệp & Git: ĐẠT**
+   - Commit message chuẩn chỉ: *"Add AODV MANET Tcl base script and run_simulation.sh (UDP/CBR)"*.
+
+### 2. Kết luận nghiệm thu lại Thành viên 3
+
+* **Đánh giá:** **10/10 (Xuất sắc - Nghiệm thu hoàn toàn)**.
+* **Lưu ý nhỏ:** File cũ `tcl/manet_aodv_sc01.tcl` hiện không còn sử dụng, toàn bộ nhóm sẽ dùng `tcl/manet_aodv_base.tcl` và `tcl/run_simulation.sh` làm công cụ mô phỏng chính thức.
+* **Chuyển giao giai đoạn:** Mô hình Tcl đã hoàn thiện 100% và khớp hoàn toàn với kịch bản của TV4. Chuyển giao ngay cho **TV4 (Nguyễn Minh Trí) chạy thực tế 12 lượt mô phỏng** (4 kịch bản $\times$ 3 run) trên máy ảo Ubuntu để sinh dữ liệu trace cho TV5.
