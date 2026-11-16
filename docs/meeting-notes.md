@@ -69,7 +69,7 @@ l
 |---|---|---|---|---|
 | **TV4 (Trí)** | Mobility & Kịch bản SC01–SC04 | 16 file scenario + script + doc | **Đạt xuất sắc** | Sẵn sàng cho giai đoạn chạy |
 | **TV2 (Đạt)** | Môi trường NS-2, NAM, AWK | Hướng dẫn cài đặt | **Đạt** (Thiếu ảnh minh chứng) | Bổ sung ảnh trước ngày 18/11 |
-| **TV3 (Vượng)** | Mô hình kịch bản Tcl AODV | File `manet_aodv_sc01.tcl` | **Chưa đạt** (Sai tích hợp, sai đường dẫn) | Cập nhật lại trước ngày 17/11 |
+| **TV3 (Vượng)** | Mô hình kịch bản Tcl AODV | File `manet_aodv_sc01.tcl` | **Chưa đạt** (Sai tích hợp, sai đường dẫn) | Cập nhật lại trước ngày 16/11 |
 
 ---
 
