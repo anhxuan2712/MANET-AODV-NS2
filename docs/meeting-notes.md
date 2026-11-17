@@ -82,67 +82,69 @@ l
 
 ---
 
-## Cập nhật Đánh giá lại TV3 (16/11/2026 - Tối, Sau khi hoàn thiện)
+## Cuộc họp Review tiến độ & Nghiệm thu đợt 2: Dữ liệu mô phỏng thực nghiệm (17/11/2026)
 
-- **Thời gian:** 16/11/2026 (Tối)
+- **Thời gian:** 17/11/2026
 - **Chủ trì review:** Nguyễn Anh Xuân (TV1 - Leader)
-- **Nội dung:** Đánh giá bản sửa đổi của Thành viên 3 (Nguyễn Phúc Vượng) qua Pull Request #4 (Commit `555e316`).
-- **Sản phẩm bàn giao cập nhật:** `tcl/manet_aodv_base.tcl` và `tcl/run_simulation.sh`.
+- **Nội dung:** Đánh giá kết quả thực thi mô phỏng của Thành viên 2 (Nguyễn Thành Đạt) qua Pull Request #5 (Commit `788f5f1`) và kho lưu trữ trace thực nghiệm trên Google Drive.
+- **Sản phẩm bàn giao:**
+  1. Thư mục Google Drive `trace/raw/` chứa đủ 12 file trace gốc: `trace_sc01_run01..03.tr` đến `trace_sc04_run01..03.tr`.
+  2. Bổ sung 4 ảnh minh chứng thực nghiệm vào `screenshots/`: ảnh terminal chạy `./run_simulation.sh 1 2 3` và 3 ảnh hoạt ảnh NAM (`nam_sc01_static.png`, `nam_sc04_mobile_01.png`, `nam_sc04_mobile_02.png`).
+  3. Bổ sung 12 file log chạy chi tiết vào `trace/logs/` (`log_sc01_run01.txt` đến `log_sc04_run03.txt`).
 
-### 1. Kết quả kiểm tra đối chiếu các yêu cầu khắc phục
+### 1. Kết quả kiểm tra đối chiếu kỹ thuật
 
-1. **Khả năng tích hợp kịch bản của TV4: ĐẠT XUẤT SẮC (10/10)**
-   - Script tự động nhận diện và nạp đúng đường dẫn các file kịch bản của TV4: `scenarios/SC0X_speed_X/mobility_sc0X_run0Y.txt` và `traffic_cbr.txt`.
-   - Có cơ chế chặn lỗi nghiêm ngặt: Nếu thiếu file kịch bản của TV4, script sẽ báo lỗi và dừng ngay lập tức; không tự tiện sinh ngẫu nhiên làm sai lệch tính khách quan của thực nghiệm.
-   - Các biến đối tượng `$ns_`, `$node_($i)`, `$god_` khớp 100% với file do TV4 sinh ra.
-2. **Quy chuẩn lưu trữ file Trace & NAM: ĐẠT (10/10)**
-   - Đã chuyển toàn bộ đường dẫn lưu file đầu ra về đúng thư mục chuẩn `../trace/raw/` theo định dạng `trace_<sc>_run<seed>.tr` và `nam_<sc>_run<seed>.nam`.
-   - Thêm cơ chế bảo toàn dữ liệu gốc: Báo lỗi và từ chối ghi đè nếu file trace đã tồn tại (chỉ ghi đè khi có cờ `-force` chạy thử nghiệm).
-3. **Tối ưu hóa dung lượng Trace: ĐẠT (10/10)**
-   - Đã cấu hình chính xác: `macTrace OFF`, `movementTrace OFF`, chỉ giữ lại `agentTrace ON` và `routerTrace ON`. File trace sẽ rất gọn gàng, đúng trọng tâm cho TV5 phân tích AWK.
-4. **Nâng cấp Script tự động hóa (`run_simulation.sh`): ĐẠT XUẤT SẮC**
-   - Hỗ trợ linh hoạt chạy 1 lượt (`./run_simulation.sh`) hoặc nhiều lượt với seed tùy chọn (`./run_simulation.sh 1 2 3`).
-   - Tự động tạo thư mục log và lưu vết chi tiết từng lần chạy vào `../trace/logs/log_<sc>_run<seed>.txt`.
-   - Tích hợp sẵn câu lệnh AWK kiểm tra nhanh số gói CBR gửi (`AGT s`) và nhận (`AGT r`), cảnh báo nếu kịch bản không nhận được gói tin nào.
-5. **Tính chuyên nghiệp & Git: ĐẠT**
-   - Commit message chuẩn chỉ: *"Add AODV MANET Tcl base script and run_simulation.sh (UDP/CBR)"*.
+1. **Tính đầy đủ của số liệu thực nghiệm: ĐẠT XUẤT SẮC (10/10)**
+   - Đã chạy trọn vẹn đủ 4 kịch bản $\times$ 3 lượt chạy (seeds 1, 2, 3) = **12 lượt mô phỏng**.
+   - Tất cả 12 lượt chạy đều kết thúc thành công ở mốc 100.0s, không xảy ra lỗi crash bộ nhớ hay lỗi segmentation fault.
+2. **Tính chân thực và quy luật khoa học của dữ liệu Trace: ĐẠT XUẤT SẮC (10/10)**
+   - Dung lượng các file trace tăng đều đặn theo tốc độ: SC01 (1.4 – 1.6 MB) $\rightarrow$ SC02 (1.7 – 1.8 MB) $\rightarrow$ SC03 (2.0 – 2.4 MB) $\rightarrow$ SC04 (2.2 – 2.5 MB).
+   - Kiểm tra ngẫu nhiên bằng AWK:
+     - **SC01 (0 m/s - Đứng yên):** Gửi 3.510 gói CBR, nhận đủ 3.510 gói (**PDR = 100.00%**), gói điều khiển AODV = 204 gói (chỉ tìm đường ban đầu).
+     - **SC04 (15 m/s - Di chuyển nhanh):** Gửi 3.510 gói CBR, nhận 3.486 gói (**PDR = 99.32%**, xuất hiện 36 gói tin bị drop), gói điều khiển AODV tăng vọt lên **653 gói** (tăng hơn gấp 3 lần do mạng liên tục bị đứt tuyến và phải gửi RERR, RREQ).
+   - Dữ liệu phản ánh đúng 100% bản chất lý thuyết của mạng MANET và giao thức định tuyến AODV.
+3. **Hình ảnh minh chứng và lưu vết log: ĐẠT (10/10)**
+   - Ảnh chụp terminal rõ ràng, sắc nét, thể hiện đúng các thông số đầu vào và kết quả kiểm tra CBR tức thì.
+   - Hoạt ảnh NAM thể hiện trực quan các node di chuyển và vùng phủ sóng.
 
-### 2. Kết luận nghiệm thu lại Thành viên 3
+### 2. Kết luận nghiệm thu Thành viên 2
 
-* **Đánh giá:** **10/10 (Xuất sắc - Nghiệm thu hoàn toàn)**.
-* **Lưu ý nhỏ:** File cũ `tcl/manet_aodv_sc01.tcl` hiện không còn sử dụng, toàn bộ nhóm sẽ dùng `tcl/manet_aodv_base.tcl` và `tcl/run_simulation.sh` làm công cụ mô phỏng chính thức.
-* **Chuyển giao giai đoạn:** Mô hình Tcl đã hoàn thiện 100% và khớp hoàn toàn với kịch bản của TV4. Chuyển giao ngay cho **TV4 (Nguyễn Minh Trí) chạy thực tế 12 lượt mô phỏng** (4 kịch bản $\times$ 3 run) trên máy ảo Ubuntu để sinh dữ liệu trace cho TV5.
+* **Đánh giá:** **10/10 (Xuất sắc - Nghiệm thu hoàn toàn Giai đoạn 5)**.
+* **Kế hoạch hành động tiếp theo (Chuyển giao sang Giai đoạn 6):**
+  - Dữ liệu trace thô đã sẵn sàng. Bàn giao ngay cho **Thành viên 5 (Kiều Đức Dương)** chạy script AWK và Python để bóc tách 5 chỉ số hiệu năng (PDR, PLR, Delay, Throughput, Routing Overhead) và cập nhật vào file `results/metrics.csv`.
+  - Nhắc nhở **Thành viên 6 (Lê Tuấn Anh)** chuẩn bị sẵn script `analysis/plot_charts.py` để khi TV5 có bảng số liệu CSV là tiến hành vẽ đồ thị ngay.
 
 
 ---
 
-## Cập nhật Đánh giá lại TV3 (16/11/2026 - Tối, Sau khi hoàn thiện)
+## Cuộc họp Review tiến độ & Nghiệm thu đợt 2: Dữ liệu mô phỏng thực nghiệm (17/11/2026)
 
-- **Thời gian:** 16/11/2026 (Tối)
+- **Thời gian:** 17/11/2026
 - **Chủ trì review:** Nguyễn Anh Xuân (TV1 - Leader)
-- **Nội dung:** Đánh giá bản sửa đổi của Thành viên 3 (Nguyễn Phúc Vượng) qua Pull Request #4 (Commit `555e316`).
-- **Sản phẩm bàn giao cập nhật:** `tcl/manet_aodv_base.tcl` và `tcl/run_simulation.sh`.
+- **Nội dung:** Đánh giá kết quả thực thi mô phỏng của Thành viên 2 (Nguyễn Thành Đạt) qua Pull Request #5 (Commit `788f5f1`) và kho lưu trữ trace thực nghiệm trên Google Drive.
+- **Sản phẩm bàn giao:**
+  1. Thư mục Google Drive `trace/raw/` chứa đủ 12 file trace gốc: `trace_sc01_run01..03.tr` đến `trace_sc04_run01..03.tr`.
+  2. Bổ sung 4 ảnh minh chứng thực nghiệm vào `screenshots/`: ảnh terminal chạy `./run_simulation.sh 1 2 3` và 3 ảnh hoạt ảnh NAM (`nam_sc01_static.png`, `nam_sc04_mobile_01.png`, `nam_sc04_mobile_02.png`).
+  3. Bổ sung 12 file log chạy chi tiết vào `trace/logs/` (`log_sc01_run01.txt` đến `log_sc04_run03.txt`).
 
-### 1. Kết quả kiểm tra đối chiếu các yêu cầu khắc phục
+### 1. Kết quả kiểm tra đối chiếu kỹ thuật
 
-1. **Khả năng tích hợp kịch bản của TV4: ĐẠT XUẤT SẮC (10/10)**
-   - Script tự động nhận diện và nạp đúng đường dẫn các file kịch bản của TV4: `scenarios/SC0X_speed_X/mobility_sc0X_run0Y.txt` và `traffic_cbr.txt`.
-   - Có cơ chế chặn lỗi nghiêm ngặt: Nếu thiếu file kịch bản của TV4, script sẽ báo lỗi và dừng ngay lập tức; không tự tiện sinh ngẫu nhiên làm sai lệch tính khách quan của thực nghiệm.
-   - Các biến đối tượng `$ns_`, `$node_($i)`, `$god_` khớp 100% với file do TV4 sinh ra.
-2. **Quy chuẩn lưu trữ file Trace & NAM: ĐẠT (10/10)**
-   - Đã chuyển toàn bộ đường dẫn lưu file đầu ra về đúng thư mục chuẩn `../trace/raw/` theo định dạng `trace_<sc>_run<seed>.tr` và `nam_<sc>_run<seed>.nam`.
-   - Thêm cơ chế bảo toàn dữ liệu gốc: Báo lỗi và từ chối ghi đè nếu file trace đã tồn tại (chỉ ghi đè khi có cờ `-force` chạy thử nghiệm).
-3. **Tối ưu hóa dung lượng Trace: ĐẠT (10/10)**
-   - Đã cấu hình chính xác: `macTrace OFF`, `movementTrace OFF`, chỉ giữ lại `agentTrace ON` và `routerTrace ON`. File trace sẽ rất gọn gàng, đúng trọng tâm cho TV5 phân tích AWK.
-4. **Nâng cấp Script tự động hóa (`run_simulation.sh`): ĐẠT XUẤT SẮC**
-   - Hỗ trợ linh hoạt chạy 1 lượt (`./run_simulation.sh`) hoặc nhiều lượt với seed tùy chọn (`./run_simulation.sh 1 2 3`).
-   - Tự động tạo thư mục log và lưu vết chi tiết từng lần chạy vào `../trace/logs/log_<sc>_run<seed>.txt`.
-   - Tích hợp sẵn câu lệnh AWK kiểm tra nhanh số gói CBR gửi (`AGT s`) và nhận (`AGT r`), cảnh báo nếu kịch bản không nhận được gói tin nào.
-5. **Tính chuyên nghiệp & Git: ĐẠT**
-   - Commit message chuẩn chỉ: *"Add AODV MANET Tcl base script and run_simulation.sh (UDP/CBR)"*.
+1. **Tính đầy đủ của số liệu thực nghiệm: ĐẠT XUẤT SẮC (10/10)**
+   - Đã chạy trọn vẹn đủ 4 kịch bản $\times$ 3 lượt chạy (seeds 1, 2, 3) = **12 lượt mô phỏng**.
+   - Tất cả 12 lượt chạy đều kết thúc thành công ở mốc 100.0s, không xảy ra lỗi crash bộ nhớ hay lỗi segmentation fault.
+2. **Tính chân thực và quy luật khoa học của dữ liệu Trace: ĐẠT XUẤT SẮC (10/10)**
+   - Dung lượng các file trace tăng đều đặn theo tốc độ: SC01 (1.4 – 1.6 MB) $\rightarrow$ SC02 (1.7 – 1.8 MB) $\rightarrow$ SC03 (2.0 – 2.4 MB) $\rightarrow$ SC04 (2.2 – 2.5 MB).
+   - Kiểm tra ngẫu nhiên bằng AWK:
+     - **SC01 (0 m/s - Đứng yên):** Gửi 3.510 gói CBR, nhận đủ 3.510 gói (**PDR = 100.00%**), gói điều khiển AODV = 204 gói (chỉ tìm đường ban đầu).
+     - **SC04 (15 m/s - Di chuyển nhanh):** Gửi 3.510 gói CBR, nhận 3.486 gói (**PDR = 99.32%**, xuất hiện 36 gói tin bị drop), gói điều khiển AODV tăng vọt lên **653 gói** (tăng hơn gấp 3 lần do mạng liên tục bị đứt tuyến và phải gửi RERR, RREQ).
+   - Dữ liệu phản ánh đúng 100% bản chất lý thuyết của mạng MANET và giao thức định tuyến AODV.
+3. **Hình ảnh minh chứng và lưu vết log: ĐẠT (10/10)**
+   - Ảnh chụp terminal rõ ràng, sắc nét, thể hiện đúng các thông số đầu vào và kết quả kiểm tra CBR tức thì.
+   - Hoạt ảnh NAM thể hiện trực quan các node di chuyển và vùng phủ sóng.
 
-### 2. Kết luận nghiệm thu lại Thành viên 3
+### 2. Kết luận nghiệm thu Thành viên 2
 
-* **Đánh giá:** **10/10 (Xuất sắc - Nghiệm thu hoàn toàn)**.
-* **Lưu ý nhỏ:** File cũ `tcl/manet_aodv_sc01.tcl` hiện không còn sử dụng, toàn bộ nhóm sẽ dùng `tcl/manet_aodv_base.tcl` và `tcl/run_simulation.sh` làm công cụ mô phỏng chính thức.
-* **Chuyển giao giai đoạn:** Mô hình Tcl đã hoàn thiện 100% và khớp hoàn toàn với kịch bản của TV4. Chuyển giao ngay cho **TV4 (Nguyễn Minh Trí) chạy thực tế 12 lượt mô phỏng** (4 kịch bản $\times$ 3 run) trên máy ảo Ubuntu để sinh dữ liệu trace cho TV5.
+* **Đánh giá:** **10/10 (Xuất sắc - Nghiệm thu hoàn toàn Giai đoạn 5)**.
+* **Kế hoạch hành động tiếp theo (Chuyển giao sang Giai đoạn 6):**
+  - Dữ liệu trace thô đã sẵn sàng. Bàn giao ngay cho **Thành viên 5 (Kiều Đức Dương)** chạy script AWK và Python để bóc tách 5 chỉ số hiệu năng (PDR, PLR, Delay, Throughput, Routing Overhead) và cập nhật vào file `results/metrics.csv`.
+  - Nhắc nhở **Thành viên 6 (Lê Tuấn Anh)** chuẩn bị sẵn script `analysis/plot_charts.py` để khi TV5 có bảng số liệu CSV là tiến hành vẽ đồ thị ngay.
