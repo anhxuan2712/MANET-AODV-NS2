@@ -114,3 +114,32 @@ l
   - Dữ liệu trace thô đã sẵn sàng. Bàn giao ngay cho **Thành viên 5 (Kiều Đức Dương)** chạy script AWK và Python để bóc tách 5 chỉ số hiệu năng (PDR, PLR, Delay, Throughput, Routing Overhead) và cập nhật vào file `results/metrics.csv`.
   - Nhắc nhở **Thành viên 6 (Lê Tuấn Anh)** chuẩn bị sẵn script `analysis/plot_charts.py` để khi TV5 có bảng số liệu CSV là tiến hành vẽ đồ thị ngay.
 
+
+
+---
+
+## Cuộc họp Review tiến độ & Nghiệm thu đợt 3: Xử lý số liệu & Phân tích Trace (17/11/2026)
+
+- **Thời gian:** 17/11/2026 (Tối)
+- **Chủ trì review:** Nguyễn Anh Xuân (TV1 - Leader)
+- **Nội dung:** Đánh giá và chuẩn hóa sản phẩm của Thành viên 5 (Kiều Đức Dương) - Phụ trách Phân tích Trace & Tính toán chỉ số hiệu năng.
+
+### 1. Kết quả đánh giá chuyên môn
+- **Tính toán chỉ số:** TV5 đã xử lý toàn diện 12 file trace, xây dựng bộ script Python chuyên sâu để bóc tách từng chỉ số: PDR, Packet Loss, Average End-to-End Delay, Throughput, Routing Overhead (phân tích chi tiết cả 4 loại gói AODV: REQUEST, REPLY, ERROR, HELLO).
+- **Quy luật số liệu khoa học:**
+  - PDR giảm nhẹ theo tốc độ: SC01 (99.99%) $\rightarrow$ SC02 (99.75%) $\rightarrow$ SC03 (99.47%) $\rightarrow$ SC04 (99.27%).
+  - Routing Overhead tăng mạnh theo tốc độ: SC01 (208 gói) $\rightarrow$ SC02 (368 gói) $\rightarrow$ SC03 (584 gói) $\rightarrow$ SC04 (726 gói).
+  - Throughput duy trì ổn định ~159 – 160 Kbps.
+- **Sản phẩm trực quan:** Xuất file Excel `Tong_hop_12_lan_chay.xlsx` có định dạng màu sắc chuyên nghiệp và báo cáo phân tích định dạng Word.
+
+### 2. Chuẩn hóa cấu trúc và dữ liệu dự án
+- Đã khắc phục lỗi tổ chức thư mục của TV5:
+  - 18 script Python phân tích và kiểm tra được đưa vào thư mục chuẩn `analysis/`.
+  - Các file CSV chi tiết và file Excel tổng hợp được đưa vào thư mục `results/`.
+  - File Word báo cáo phân tích trace được đưa vào thư mục `report/Bao_cao_phan_tich_trace_TV5.docx`.
+  - Loại bỏ hoàn toàn các file trace `.tr` thô khỏi Git repo để giữ dung lượng nhẹ (đã lưu trữ an toàn trên Google Drive).
+  - Cập nhật đầy đủ số liệu trung bình 4 kịch bản vào bảng đích `results/metrics.csv`.
+
+### 3. Kết luận nghiệm thu Thành viên 5
+- **Đánh giá:** **9.5/10 (Xuất sắc về phân tích số liệu - Nghiệm thu hoàn toàn Giai đoạn 6)**.
+- **Kế hoạch tiếp theo (Giai đoạn 7):** Bàn giao bảng số liệu `results/metrics.csv` cho **Thành viên 6 (Lê Tuấn Anh)** để chạy script `analysis/plot_charts.py` vẽ 5 biểu đồ hiệu năng, hoàn thiện báo cáo và slide thuyết trình.
