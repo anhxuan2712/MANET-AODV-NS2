@@ -1,4 +1,4 @@
-L# BIÊN BẢN HỌP NHÓM ĐỊNH KỲ
+# BIÊN BẢN HỌP NHÓM ĐỊNH KỲ
 
 **Dự án:** Nghiên cứu và đánh giá hiệu năng giao thức định tuyến AODV trong mạng MANET sử dụng NS-2  
 
@@ -14,7 +14,6 @@ L# BIÊN BẢN HỌP NHÓM ĐỊNH KỲ
   2. Thống nhất 4 kịch bản thay đổi tốc độ tối đa: SC01 (0 m/s), SC02 (5 m/s), SC03 (10 m/s), SC04 (15 m/s).
   3. Phân chia vai trò, trách nhiệm từng thành viên theo Project Charter.
   4. Thống nhất cấu trúc thư mục chuẩn và nguyên tắc không commit file trace lớn lên GitHub.
-l
 
 ---
 
@@ -143,3 +142,27 @@ l
 ### 3. Kết luận nghiệm thu Thành viên 5
 - **Đánh giá:** **9.5/10 (Xuất sắc về phân tích số liệu - Nghiệm thu hoàn toàn Giai đoạn 6)**.
 - **Kế hoạch tiếp theo (Giai đoạn 7):** Bàn giao bảng số liệu `results/metrics.csv` cho **Thành viên 6 (Lê Tuấn Anh)** để chạy script `analysis/plot_charts.py` vẽ 5 biểu đồ hiệu năng, hoàn thiện báo cáo và slide thuyết trình.
+
+---
+
+## Cuộc họp Review bổ sung: Nghiệm thu Tài liệu Thẩm định Cấu hình (20/11/2026)
+
+- **Thời gian:** 20/11/2026
+- **Chủ trì review:** Nguyễn Anh Xuân (TV1 - Leader)
+- **Nội dung:** Thẩm định và nghiệm thu tài liệu độc lập của Thành viên 5 (Kiều Đức Dương): *"Báo cáo đối chiếu cấu hình mô phỏng mạng MANET sử dụng giao thức định tuyến AODV"*.
+- **Sản phẩm bàn giao:** File tài liệu Word `docs/bang-doi-chieu-cau-hinh-tv5.docx` (Trích xuất từ commit `8b7e3ff`).
+
+### 1. Kết quả đánh giá chuyên môn
+- **Tính cẩn trọng và chặt chẽ:** TV5 đã lập bảng đối chiếu chi tiết giữa kịch bản sơ khai (`manet_aodv_sc01.tcl`), kịch bản chuẩn hóa (`manet_aodv_base.tcl`) và bộ sinh kịch bản (`gen_scenarios.sh`).
+- **Phát hiện xác đáng:** Nhận diện rõ việc tắt `macTrace` và `movementTrace` để tối ưu dung lượng file, đồng thời làm rõ sự khác biệt giữa cấu hình 4 luồng CBR nội bộ và 10 luồng CBR chuẩn hóa.
+- **Tính học thuật:** Xác định rõ sự suy giảm PDR và gia tăng Routing Overhead là giả thuyết nghiên cứu cần kiểm chứng bằng dữ liệu trace thực tế, không võ đoán.
+
+### 2. Thống nhất và Giải đáp của Leader cho TV5
+1. **Lưu lượng chuẩn hóa:** Xác nhận sử dụng **10 luồng UDP/CBR** (512B, interval 0.25s, phát 5s–95s) do TV4 sinh ra.
+2. **Kịch bản mô phỏng:** Chạy chính thức trên **`tcl/manet_aodv_base.tcl`** (chế độ tắt MAC trace để giảm dung lượng file xuống ~2MB/file).
+3. **Bộ dữ liệu 12 file trace:** Đã được TV2 chạy và kiểm tra toàn vẹn, hoàn toàn tương thích và khớp với phân tích của TV5.
+
+### 3. Kết luận nghiệm thu
+- **Đánh giá:** **10/10 (Xuất sắc về phương pháp nghiên cứu và tư duy phản biện)**.
+- **Hành động:** Lưu tài liệu vào `docs/bang-doi-chieu-cau-hinh-tv5.docx`. Hướng dẫn TV5 reset nhánh cá nhân đồng bộ với `main` để tránh xung đột lịch sử commit cũ.
+
