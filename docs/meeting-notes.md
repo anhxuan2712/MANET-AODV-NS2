@@ -166,3 +166,27 @@
 - **Đánh giá:** **10/10 (Xuất sắc về phương pháp nghiên cứu và tư duy phản biện)**.
 - **Hành động:** Lưu tài liệu vào `docs/bang-doi-chieu-cau-hinh-tv5.docx`. Hướng dẫn TV5 reset nhánh cá nhân đồng bộ với `main` để tránh xung đột lịch sử commit cũ.
 
+---
+
+## Cuộc họp Review tiến độ & Nghiệm thu đợt 5: Biểu đồ Hiệu năng Khoa học (20/11/2026)
+
+- **Thời gian:** 20/11/2026
+- **Chủ trì review:** Nguyễn Anh Xuân (TV1 - Leader)
+- **Nội dung:** Đánh giá và nghiệm thu sản phẩm trực quan hóa dữ liệu của Thành viên 6 (Lê Tuấn Anh) từ nhánh `origin/tv6-letuananh` (commit `d8cbbd4`).
+- **Sản phẩm bàn giao:** 5 file biểu đồ khoa học định dạng PNG chất lượng cao (300 DPI) lưu tại `results/figures/`:
+  1. `fig_pdr.png` (Tỷ lệ phân phát gói tin PDR)
+  2. `fig_packet_loss.png` (Tỷ lệ mất gói tin PLR)
+  3. `fig_delay.png` (Độ trễ trung bình đầu cuối)
+  4. `fig_throughput.png` (Thông lượng mạng)
+  5. `fig_routing_overhead.png` (Chi phí điều khiển định tuyến AODV)
+
+### 1. Kết quả kiểm tra đối chiếu kỹ thuật
+- **Độ phân giải & Thẩm mỹ:** Đạt chuẩn độ phân giải cao (~2100 × 1400 px, 300 DPI), phong cách biểu đồ khoa học rõ ràng, có đầy đủ nhãn trục, đơn vị đo, đường lưới và đánh dấu điểm dữ liệu.
+- **Tính khớp nối số liệu:** Các đường biểu diễn trên 5 biểu đồ khớp 100% với số liệu trung bình trong bảng `results/metrics.csv`.
+- **Tuân thủ quy chuẩn Git:** Rẽ nhánh từ bản `main` mới nhất, đặt tên file và đường dẫn thư mục đúng 100% theo Section 8.1 của Project Charter, không phát sinh xung đột (Merge sạch sẽ qua PR).
+
+### 2. Kết luận nghiệm thu Thành viên 6
+- **Đánh giá:** **10/10 (Xuất sắc - Nghiệm thu hoàn toàn Nhiệm vụ 1 của Giai đoạn 7)**.
+- **Hành động tiếp theo:** Leader đã merge trực tiếp vào nhánh `main`. Yêu cầu TV6 phối hợp cùng Leader hoàn thiện nốt 2 hạng mục cuối cùng: Báo cáo Word 5 chương (`report/report.docx`) và Slide bảo vệ (`report/slides.pptx`).
+
+
