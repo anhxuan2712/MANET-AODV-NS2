@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luồng phân tích & làm sạch dữ liệu MANET AODV</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .node-btn {
+      transition: transform 0.12s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .node-btn:hover {
+      transform: translateY(-1px);
+    }
+    .node-active {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+    .tab-btn {
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .stage-accent-1 { border-left: 3px solid var(--chart-1); }
+    .stage-accent-2 { border-left: 3px solid var(--chart-2); }
+    .stage-accent-3 { border-left: 3px solid var(--chart-3); }
+    .stage-accent-4 { border-left: 3px solid var(--chart-4); }
+    .stage-accent-5 { border-left: 3px solid var(--chart-5); }
+    .pill-1 { background: color-mix(in srgb, var(--chart-1) 14%, transparent); color: var(--foreground); border: 1px solid color-mix(in srgb, var(--chart-1) 35%, transparent); }
+    .pill-2 { background: color-mix(in srgb, var(--chart-2) 14%, transparent); color: var(--foreground); border: 1px solid color-mix(in srgb, var(--chart-2) 35%, transparent); }
+    .pill-3 { background: color-mix(in srgb, var(--chart-3) 14%, transparent); color: var(--foreground); border: 1px solid color-mix(in srgb, var(--chart-3) 35%, transparent); }
+    .pill-4 { background: color-mix(in srgb, var(--chart-4) 14%, transparent); color: var(--foreground); border: 1px solid color-mix(in srgb, var(--chart-4) 35%, transparent); }
+    .pill-5 { background: color-mix(in srgb, var(--chart-5) 14%, transparent); color: var(--foreground); border: 1px solid color-mix(in srgb, var(--chart-5) 35%, transparent); }
+    .arrow-stroke { stroke: var(--muted-foreground); stroke-width: 1.5; fill: none; opacity: 0.75; }
+    .arrow-head { fill: var(--muted-foreground); opacity: 0.85; }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-0 m-0">
+  <div class="py-2 space-y-2.5">
+    <!-- Top Tabs -->
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--card-border)]">
+      <div class="flex items-center gap-1.5">
+        <button id="tab-main" onclick="switchView('main')" class="tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)]">
+          1. Luồng xử lý chính (5 bước)
+        </button>
+        <button id="tab-outlier" onclick="switchView('outlier')" class="tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)]">
+          2. Nhánh điều tra dị biệt SC01_run01
+        </button>
+        <button id="tab-map" onclick="switchView('map')" class="tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)]">
+          3. Bản đồ 21 Script
+        </button>
+      </div>
+      <span class="text-xs text-[var(--muted-foreground)]">Nhấp vào từng khối để xem chi tiết thuật toán</span>
+    </div>
+
+    <!-- VIEW 1: MAIN 5-STAGE PIPELINE -->
+    <div id="view-main" class="space-y-2.5">
+      <div class="grid items-stretch gap-0" style="grid-template-columns: 1fr 18px 1.12fr 18px 1.25fr 18px 1.12fr 18px 1.12fr;">
+        <!-- Stage 1 -->
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)] truncate">① Đầu vào thô</div>
+          <div class="flex-1 flex flex-col justify-center">
+            <button data-node="raw" onclick="selectNode('raw')" class="node-btn stage-accent-1 w-full text-left p-2 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">12 tệp Trace (.tr)</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5 leading-snug">SC01–SC04 × 3 seed (0–15 m/s)</div>
+              <div class="text-xs font-mono text-[var(--muted-foreground)] mt-1">trace_sc*_run*.tr</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Arrow 1 -> 2 -->
+        <div class="flex items-center pt-5">
+          <svg viewBox="0 0 18 180" class="w-full h-44" preserveAspectRatio="none">
+            <path d="M0,90 C9,90 9,46 15,46" class="arrow-stroke" />
+            <path d="M0,90 C9,90 9,134 15,134" class="arrow-stroke" />
+            <polygon points="18,46 13,42 13,50" class="arrow-head" />
+            <polygon points="18,134 13,130 13,138" class="arrow-head" />
+          </svg>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)] truncate">② Làm sạch & QA</div>
+          <div class="flex-1 flex flex-col justify-center gap-2">
+            <button data-node="filter" onclick="selectNode('filter')" class="node-btn stage-accent-2 w-full text-left p-2 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">Lọc tầng & Tách luồng</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5 leading-snug">AGT+cbr | RTR+AODV</div>
+            </button>
+            <button data-node="dedup" onclick="selectNode('dedup')" class="node-btn stage-accent-2 w-full text-left p-2 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">Khử trùng khóa kép</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5 leading-snug">(flow_id, seq) → 0 trùng</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Arrow 2 -> 3 -->
+        <div class="flex items-center pt-5">
+          <svg viewBox="0 0 18 180" class="w-full h-44" preserveAspectRatio="none">
+            <path d="M0,46 C9,46 9,22 15,22" class="arrow-stroke" />
+            <path d="M0,46 C9,46 9,68 15,68" class="arrow-stroke" />
+            <path d="M0,134 C9,134 9,112 15,112" class="arrow-stroke" />
+            <path d="M0,134 C9,134 9,158 15,158" class="arrow-stroke" />
+            <polygon points="18,22 13,18 13,26" class="arrow-head" />
+            <polygon points="18,68 13,64 13,72" class="arrow-head" />
+            <polygon points="18,112 13,108 13,116" class="arrow-head" />
+            <polygon points="18,158 13,154 13,162" class="arrow-head" />
+          </svg>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)] truncate">③ Tính 4 chỉ số (TV5)</div>
+          <div class="flex-1 flex flex-col justify-between gap-1.5">
+            <button data-node="pdr" onclick="selectNode('pdr')" class="node-btn stage-accent-3 w-full text-left px-2 py-1.5 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">PDR & PLR (v2)</div>
+              <div class="text-xs text-[var(--muted-foreground)] truncate">ket_qua_PDR_v2.csv</div>
+            </button>
+            <button data-node="delay" onclick="selectNode('delay')" class="node-btn stage-accent-3 w-full text-left px-2 py-1.5 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">Avg Delay (v2)</div>
+              <div class="text-xs text-[var(--muted-foreground)] truncate">ket_qua_Delay_v2.csv</div>
+            </button>
+            <button data-node="tput" onclick="selectNode('tput')" class="node-btn stage-accent-3 w-full text-left px-2 py-1.5 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">Throughput</div>
+              <div class="text-xs text-[var(--muted-foreground)] truncate">ket_qua_Throughput.csv</div>
+            </button>
+            <button data-node="nro" onclick="selectNode('nro')" class="node-btn stage-accent-3 w-full text-left px-2 py-1.5 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">Routing Overhead</div>
+              <div class="text-xs text-[var(--muted-foreground)] truncate">ket_qua_Routing_Overhead.csv</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Arrow 3 -> 4 -->
+        <div class="flex items-center pt-5">
+          <svg viewBox="0 0 18 180" class="w-full h-44" preserveAspectRatio="none">
+            <path d="M0,22 C9,22 9,46 15,46" class="arrow-stroke" />
+            <path d="M0,68 C9,68 9,46 15,46" class="arrow-stroke" />
+            <path d="M0,112 C9,112 9,134 15,134" class="arrow-stroke" />
+            <path d="M0,158 C9,158 9,134 15,134" class="arrow-stroke" />
+            <polygon points="18,46 13,42 13,50" class="arrow-head" />
+            <polygon points="18,134 13,130 13,138" class="arrow-head" />
+          </svg>
+        </div>
+
+        <!-- Stage 4 -->
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)] truncate">④ Tổng hợp</div>
+          <div class="flex-1 flex flex-col justify-center gap-2">
+            <button data-node="excel" onclick="selectNode('excel')" class="node-btn stage-accent-4 w-full text-left p-2 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">Ghép Excel 2 Sheet</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5 leading-snug">tao_bang_tong_hop.py</div>
+            </button>
+            <button data-node="metrics" onclick="selectNode('metrics')" class="node-btn stage-accent-4 w-full text-left p-2 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">Chuẩn hóa TB 4 KB</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5 leading-snug">metrics.csv + analyze.py</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Arrow 4 -> 5 -->
+        <div class="flex items-center pt-5">
+          <svg viewBox="0 0 18 180" class="w-full h-44" preserveAspectRatio="none">
+            <path d="M0,46 C9,46 9,134 15,134" class="arrow-stroke" />
+            <path d="M0,134 L15,46" class="arrow-stroke" />
+            <path d="M0,134 L15,134" class="arrow-stroke" />
+            <polygon points="18,46 13,42 13,50" class="arrow-head" />
+            <polygon points="18,134 13,130 13,138" class="arrow-head" />
+          </svg>
+        </div>
+
+        <!-- Stage 5 -->
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)] truncate">⑤ Đầu ra (TV6)</div>
+          <div class="flex-1 flex flex-col justify-center gap-2">
+            <button data-node="charts" onclick="selectNode('charts')" class="node-btn stage-accent-5 w-full text-left p-2 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">5 Đồ thị 300 DPI</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5 leading-snug">plot_charts.py → PNG</div>
+            </button>
+            <button data-node="report" onclick="selectNode('report')" class="node-btn stage-accent-5 w-full text-left p-2 rounded border border-[var(--card-border)] bg-[var(--card)]">
+              <div class="text-xs font-semibold leading-tight">Báo cáo học thuật</div>
+              <div class="text-xs text-[var(--muted-foreground)] mt-0.5 leading-snug">report.docx (5 chương)</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: OUTLIER FORENSICS PIPELINE -->
+    <div id="view-outlier" class="hidden space-y-2.5">
+      <div class="grid items-stretch gap-0" style="grid-template-columns: 1fr 20px 1.15fr 20px 1.15fr 20px 1.1fr;">
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)]">① Phát hiện dị biệt</div>
+          <button data-node="out1" onclick="selectNode('out1')" class="node-btn stage-accent-2 flex-1 text-left p-2.5 rounded border border-[var(--card-border)] bg-[var(--card)]">
+            <div class="text-xs font-semibold">Soi Top Delay SC01_run01</div>
+            <div class="text-xs text-[var(--muted-foreground)] mt-1 leading-snug">kiem_tra_Delay.py<br/>kiem_tra_delay_lon.py</div>
+            <div class="text-xs text-[var(--muted-foreground)] mt-1">→ Khoanh vùng 10 flow (8–21 s)</div>
+          </button>
+        </div>
+
+        <div class="flex items-center pt-5">
+          <svg viewBox="0 0 20 140" class="w-full h-36" preserveAspectRatio="none">
+            <line x1="0" y1="70" x2="16" y2="70" class="arrow-stroke" />
+            <polygon points="20,70 14,65 14,75" class="arrow-head" />
+          </svg>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)]">② Bóc tách sự kiện</div>
+          <button data-node="out2" onclick="selectNode('out2')" class="node-btn stage-accent-3 flex-1 text-left p-2.5 rounded border border-[var(--card-border)] bg-[var(--card)]">
+            <div class="text-xs font-semibold">Truy vết CBR & AODV</div>
+            <div class="text-xs text-[var(--muted-foreground)] mt-1 leading-snug">kiem_tra_10_goi_CBR.py<br/>kiem_tra_AODV_SC01.py<br/>kiem_tra_loai_AODV.py</div>
+          </button>
+        </div>
+
+        <div class="flex items-center pt-5">
+          <svg viewBox="0 0 20 140" class="w-full h-36" preserveAspectRatio="none">
+            <line x1="0" y1="70" x2="16" y2="70" class="arrow-stroke" />
+            <polygon points="20,70 14,65 14,75" class="arrow-head" />
+          </svg>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)]">③ Đối chiếu thời điểm</div>
+          <button data-node="out3" onclick="selectNode('out3')" class="node-btn stage-accent-4 flex-1 text-left p-2.5 rounded border border-[var(--card-border)] bg-[var(--card)]">
+            <div class="text-xs font-semibold">Khớp dòng thời gian 8–21 s</div>
+            <div class="text-xs text-[var(--muted-foreground)] mt-1 leading-snug">kiem_tra_thoi_diem_REPLY.py<br/>doi_chieu_AODV_Delay.py</div>
+            <div class="text-xs text-[var(--muted-foreground)] mt-1">→ Xác định trễ chờ tìm đường</div>
+          </button>
+        </div>
+
+        <div class="flex items-center pt-5">
+          <svg viewBox="0 0 20 140" class="w-full h-36" preserveAspectRatio="none">
+            <line x1="0" y1="70" x2="16" y2="70" class="arrow-stroke" />
+            <polygon points="20,70 14,65 14,75" class="arrow-head" />
+          </svg>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <div class="text-xs font-semibold text-[var(--muted-foreground)]">④ Kiểm chứng chéo</div>
+          <button data-node="out4" onclick="selectNode('out4')" class="node-btn stage-accent-5 flex-1 text-left p-2.5 rounded border border-[var(--card-border)] bg-[var(--card)]">
+            <div class="text-xs font-semibold">Đối chiếu run02 & run03</div>
+            <div class="text-xs text-[var(--muted-foreground)] mt-1 leading-snug">kiem_tra_SC01_run02_run03.py</div>
+            <div class="text-xs text-[var(--muted-foreground)] mt-1">→ Kết luận 124 ms là dị biệt</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: FULL SCRIPT MAP -->
+    <div id="view-map" class="hidden">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div class="p-2 rounded border border-[var(--card-border)] bg-[var(--card)] stage-accent-2 space-y-1">
+          <div class="text-xs font-semibold">Làm sạch & Khử trùng (3)</div>
+          <ul class="text-xs text-[var(--muted-foreground)] space-y-0.5 font-mono">
+            <li>• kiem_tra_goi_tin.py</li>
+            <li>• kiem_tra_trung_goi.py</li>
+            <li>• kiem_tra_trung_goi_12file.py</li>
+          </ul>
+        </div>
+        <div class="p-2 rounded border border-[var(--card-border)] bg-[var(--card)] stage-accent-3 space-y-1">
+          <div class="text-xs font-semibold">Tính 4 chỉ số (6)</div>
+          <ul class="text-xs text-[var(--muted-foreground)] space-y-0.5 font-mono">
+            <li>• phan_tich_PDR.py → _v2.py</li>
+            <li>• phan_tich_Delay.py → _v2.py</li>
+            <li>• phan_tich_Throughput.py</li>
+            <li>• phan_tich_Routing_Overhead.py</li>
+          </ul>
+        </div>
+        <div class="p-2 rounded border border-[var(--card-border)] bg-[var(--card)] stage-accent-4 space-y-1">
+          <div class="text-xs font-semibold">Điều tra dị biệt SC01 (7)</div>
+          <ul class="text-xs text-[var(--muted-foreground)] space-y-0.5 font-mono">
+            <li>• kiem_tra_Delay.py</li>
+            <li>• kiem_tra_delay_lon.py</li>
+            <li>• kiem_tra_10_goi_CBR.py</li>
+            <li>• kiem_tra_AODV_SC01.py</li>
+            <li>• kiem_tra_loai_AODV.py</li>
+            <li>• kiem_tra_thoi_diem_REPLY.py</li>
+            <li>• doi_chieu_AODV_Delay.py</li>
+          </ul>
+        </div>
+        <div class="p-2 rounded border border-[var(--card-border)] bg-[var(--card)] stage-accent-5 space-y-1">
+          <div class="text-xs font-semibold">Tổng hợp, Vẽ & Phụ trợ (5)</div>
+          <ul class="text-xs text-[var(--muted-foreground)] space-y-0.5 font-mono">
+            <li>• kiem_tra_SC01_run02_run03.py</li>
+            <li>• tao_bang_tong_hop.py</li>
+            <li>• analyze.py</li>
+            <li>• plot_charts.py</li>
+            <li>• calculate_metrics.awk (mẫu)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL INSPECTOR PANEL -->
+    <div id="inspector" class="pt-2 border-t border-[var(--card-border)]">
+      <div class="p-2.5 rounded border border-[var(--card-border)] bg-[var(--card)] grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
+        <div class="sm:col-span-4 space-y-1">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span id="ins-badge" class="px-1.5 py-0.5 rounded font-medium pill-1">Giai đoạn 1</span>
+            <span id="ins-owner" class="text-[var(--muted-foreground)]">TV2 & TV4</span>
+          </div>
+          <div id="ins-title" class="font-semibold text-sm leading-snug">12 tệp Trace NS-2 thô</div>
+          <div id="ins-scripts" class="font-mono text-[var(--muted-foreground)] break-all">trace_sc01_run01.tr → trace_sc04_run03.tr</div>
+        </div>
+        <div class="sm:col-span-5 space-y-1 border-t sm:border-t-0 sm:border-l border-[var(--card-border)] pt-1.5 sm:pt-0 sm:pl-2.5">
+          <div class="font-semibold text-[var(--muted-foreground)]">Quy tắc làm sạch / Thuật toán</div>
+          <div id="ins-logic" class="leading-relaxed"></div>
+        </div>
+        <div class="sm:col-span-3 space-y-1 border-t sm:border-t-0 sm:border-l border-[var(--card-border)] pt-1.5 sm:pt-0 sm:pl-2.5">
+          <div class="font-semibold text-[var(--muted-foreground)]">Đầu ra (Output)</div>
+          <div id="ins-output" class="font-mono leading-relaxed break-words"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DATA = {
+      raw: {
+        badge: "① Đầu vào thô", pill: "pill-1", owner: "TV2 & TV4",
+        title: "12 tệp Trace NS-2 gốc (.tr)",
+        scripts: "trace_sc{01..04}_run{01..03}.tr",
+        logic: "Mỗi dòng chứa sự kiện mạng phân tách khoảng trắng: data[0]=event (s/r/D/f), data[1]=time, data[3]=layer (AGT/RTR/MAC), data[5]=flow_id, data[6]=cbr|AODV, data[17]=[seq], data[-1]=(loại AODV).",
+        output: "4 kịch bản tốc độ (0, 5, 10, 15 m/s) × 3 seed ngẫu nhiên = 12 tệp log thô"
+      },
+      filter: {
+        badge: "② Làm sạch dữ liệu", pill: "pill-2", owner: "TV5 (Kiều Đức Dương)",
+        title: "Lọc dòng lỗi, lọc tầng mạng & tách 2 mặt phẳng",
+        scripts: "Áp dụng đồng nhất trong mọi script phân tích v2",
+        logic: "Bỏ dòng thiếu trường (len < 18 với CBR, < 8 với AODV). Tách riêng: (1) Data Plane chỉ lấy AGT + cbr để khử trùng lặp đa chặng RTR/MAC; (2) Control Plane chỉ lấy RTR + AODV + event='s'.",
+        output: "Dòng sự kiện hợp lệ cho lớp ứng dụng (CBR) và lớp định tuyến (AODV)"
+      },
+      dedup: {
+        badge: "② Kiểm định toàn vẹn", pill: "pill-2", owner: "TV5 (Kiều Đức Dương)",
+        title: "Định danh khóa kép & kiểm chứng 0 trùng lặp",
+        scripts: "kiem_tra_goi_tin.py, kiem_tra_trung_goi.py, kiem_tra_trung_goi_12file.py",
+        logic: "Tạo khóa phức hợp packet_id = (flow_id, sequence.strip('[]')) để phân biệt 10 luồng CBR song song. Dùng Counter và tập hợp (set(received) - set(sent)) xác minh 0 gói gửi trùng, 0 nhận trùng, 0 gói nhận mồ côi.",
+        output: "Chứng thực độ sạch dữ liệu trên toàn bộ 12 tệp trace"
+      },
+      pdr: {
+        badge: "③ Trích xuất chỉ số", pill: "pill-3", owner: "TV5 (Kiều Đức Dương)",
+        title: "Tính PDR & Packet Loss Ratio (bản chuẩn v2)",
+        scripts: "phan_tich_PDR_v2.py (nâng cấp từ phan_tich_PDR.py)",
+        logic: "Lưu khóa (flow_id, seq) vào 2 tập hợp sent và received. Chỉ tính gói nhận hợp lệ bằng phép giao (sent & received). PDR = |S∩R|/|S| × 100%; Lost = |S| − |S∩R|; PLR = Lost/|S| × 100%.",
+        output: "results/ket_qua_PDR_v2.csv (Sent, Received, Lost, PDR%, PLR%)"
+      },
+      delay: {
+        badge: "③ Trích xuất chỉ số", pill: "pill-3", owner: "TV5 (Kiều Đức Dương)",
+        title: "Tính Average End-to-End Delay (bản chuẩn v2)",
+        scripts: "phan_tich_Delay_v2.py (nâng cấp từ phan_tich_Delay.py)",
+        logic: "Ghi mốc gửi sent_time[packet_id] = time khi event='s'. Khi gặp event='r' khớp khóa: tính delay = t_r − t_s, lọc bỏ delay < 0 và gọi ngay del sent_time[packet_id] để chống tính trùng.",
+        output: "results/ket_qua_Delay_v2.csv (Received_Packets, Average_Delay_s)"
+      },
+      tput: {
+        badge: "③ Trích xuất chỉ số", pill: "pill-3", owner: "TV5 (Kiều Đức Dương)",
+        title: "Tính Thông lượng mạng (Throughput)",
+        scripts: "phan_tich_Throughput.py",
+        logic: "Lọc AGT + cbr, ghi nhận first_send (mốc 's' nhỏ nhất), last_receive (mốc 'r' lớn nhất) và tổng gói nhận. Với PACKET_SIZE = 512 Bytes: Throughput = (received × 512 × 8) / (duration × 1000) kbps.",
+        output: "results/ket_qua_Throughput.csv (Total_Bytes, Duration_s, Throughput_Kbps)"
+      },
+      nro: {
+        badge: "③ Trích xuất chỉ số", pill: "pill-3", owner: "TV5 (Kiều Đức Dương)",
+        title: "Bóc tách gói điều khiển AODV & Routing Overhead",
+        scripts: "phan_tich_Routing_Overhead.py",
+        logic: "Lọc RTR + AODV + event='s', trích xuất loại bản tin từ cuối dòng data[-1].strip('()') vào Counter cho 4 nhóm: REQUEST, REPLY, ERROR, HELLO (ghi nhận HELLO = 0), cộng thành Total_AODV.",
+        output: "results/ket_qua_Routing_Overhead.csv (REQUEST, REPLY, ERROR, HELLO, Total_AODV)"
+      },
+      excel: {
+        badge: "④ Tổng hợp bảng", pill: "pill-4", owner: "TV5 (Kiều Đức Dương)",
+        title: "Hợp nhất 4 CSV thành bảng Excel 2 Sheet",
+        scripts: "tao_bang_tong_hop.py (thư viện openpyxl)",
+        logic: "Đọc & join 4 tệp CSV theo khóa cột File, ép kiểu float, sắp xếp SC01→SC04 / run01→run03. Sheet 1 chứa 12 lượt chạy chi tiết; Sheet 2 tự động tính trung bình 3 seed bằng statistics.mean().",
+        output: "results/Tong_hop_12_lan_chay.xlsx (2 sheets đã định dạng sẵn)"
+      },
+      metrics: {
+        badge: "④ Chuẩn hóa đầu vào", pill: "pill-4", owner: "TV5 & TV6",
+        title: "Bảng chỉ số trung bình theo 4 kịch bản tốc độ",
+        scripts: "results/metrics.csv + analysis/analyze.py",
+        logic: "Tổng hợp 4 dòng trung bình SC01–SC04, gắn tốc độ speed_mps (0, 5, 10, 15 m/s), quy đổi Delay sang ms và tính NRO = Total_AODV / Received. analyze.py dùng pandas kiểm tra nhanh bảng này.",
+        output: "results/metrics.csv (đầu vào duy nhất cho bước vẽ đồ thị)"
+      },
+      charts: {
+        badge: "⑤ Trực quan hóa", pill: "pill-5", owner: "TV6 (Lê Tuấn Anh)",
+        title: "Vẽ tự động 5 đồ thị khoa học 300 DPI",
+        scripts: "analysis/plot_charts.py (matplotlib + pandas)",
+        logic: "Đọc results/metrics.csv, áp dụng phong cách seaborn-v0_8-whitegrid, vẽ 5 biểu đồ đường theo speed_mps (0–15 m/s) với độ phân giải 300 DPI và bbox_inches='tight'.",
+        output: "results/figures/fig_{pdr, packet_loss, delay, throughput, routing_overhead}.png"
+      },
+      report: {
+        badge: "⑤ Đóng gói học thuật", pill: "pill-5", owner: "TV6 & Toàn nhóm",
+        title: "Hoàn thiện báo cáo chuyên đề & báo cáo cuối kỳ",
+        scripts: "Tích hợp bảng 4.1–4.3 + 5 biểu đồ PNG + 4 ảnh NS-2/NAM",
+        logic: "Đưa bảng 12 lượt chạy, bảng trung bình kịch bản, cơ cấu AODV và 5 đồ thị vào Chương 4; giải thích xu hướng, điểm dị biệt SC01_run01 (124 ms) và giới hạn 3 seed/kịch bản.",
+        output: "report/Bao_cao_phan_tich_trace_TV5.docx & report/report.docx"
+      },
+      out1: {
+        badge: "Dị biệt ①", pill: "pill-2", owner: "TV5 (Kiều Đức Dương)",
+        title: "Phát hiện 10 gói CBR có Delay bất thường tại SC01_run01",
+        scripts: "kiem_tra_Delay.py, kiem_tra_delay_lon.py",
+        logic: "Sắp xếp danh sách delay giảm dần trong trace_sc01_run01.tr, in top 5–10 gói lớn nhất kèm node gửi/nhận và mốc thời gian → phát hiện 10 luồng (72, 81, ..., 161) trễ lớn từ giây 8 đến 21.",
+        output: "Danh sách 10 target_flows & khung thời gian 8–21 s cần điều tra"
+      },
+      out2: {
+        badge: "Dị biệt ②", pill: "pill-3", owner: "TV5 (Kiều Đức Dương)",
+        title: "Trích xuất toàn bộ log CBR và AODV trong khung 8–21 s",
+        scripts: "kiem_tra_10_goi_CBR.py, kiem_tra_AODV_SC01.py, kiem_tra_loai_AODV.py",
+        logic: "Lọc riêng các sự kiện của 10 target_flows ở tầng CBR và toàn bộ bản tin RTR+AODV trong khoảng 8–21 s, đồng thời đếm phân loại REQUEST/REPLY/ERROR/HELLO.",
+        output: "Dòng sự kiện chi tiết của 10 luồng CBR & thống kê loại gói AODV"
+      },
+      out3: {
+        badge: "Dị biệt ③", pill: "pill-4", owner: "TV5 (Kiều Đức Dương)",
+        title: "Đối chiếu đồng bộ mốc nhận AODV REPLY với trễ CBR",
+        scripts: "kiem_tra_thoi_diem_REPLY.py, doi_chieu_AODV_Delay.py",
+        logic: "Thống kê số gói AODV theo từng giây (8–21 s) và in toàn bộ dòng REPLY, so khớp trực tiếp với thời điểm gửi/nhận của 10 gói CBR bị trễ cao.",
+        output: "Bằng chứng mốc thời gian giải thích nguyên nhân trễ cao cục bộ ở SC01_run01"
+      },
+      out4: {
+        badge: "Dị biệt ④", pill: "pill-5", owner: "TV5 (Kiều Đức Dương)",
+        title: "Kiểm chứng chéo với SC01_run02 & SC01_run03",
+        scripts: "kiem_tra_SC01_run02_run03.py",
+        logic: "Trích xuất top 10 gói có delay lớn nhất cùng lịch sử sự kiện của từng gói trên trace_sc01_run02.tr và trace_sc01_run03.tr (~41,7 ms) để so sánh với run01 (124 ms).",
+        output: "Cơ sở khẳng định SC01_run01 là điểm dị biệt cục bộ (mục 4.3.2 báo cáo)"
+      }
+    };
+
+    let activeView = 'main';
+    let activeNode = 'raw';
+
+    function switchView(view) {
+      activeView = view;
+      ['main', 'outlier', 'map'].forEach(v => {
+        document.getElementById('view-' + v).classList.toggle('hidden', v !== view);
+        const btn = document.getElementById('tab-' + v);
+        if (v === view) {
+          btn.className = "tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)]";
+        } else {
+          btn.className = "tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)]";
+        }
+      });
+      document.getElementById('inspector').classList.toggle('hidden', view === 'map');
+      if (view === 'main') selectNode('raw');
+      if (view === 'outlier') selectNode('out1');
+    }
+
+    function selectNode(id) {
+      activeNode = id;
+      document.querySelectorAll('[data-node]').forEach(el => {
+        el.classList.toggle('node-active', el.getAttribute('data-node') === id);
+      });
+      const d = DATA[id];
+      if (!d) return;
+      const badge = document.getElementById('ins-badge');
+      badge.textContent = d.badge;
+      badge.className = "px-1.5 py-0.5 rounded font-medium " + d.pill;
+      document.getElementById('ins-owner').textContent = d.owner;
+      document.getElementById('ins-title').textContent = d.title;
+      document.getElementById('ins-scripts').textContent = d.scripts;
+      document.getElementById('ins-logic').textContent = d.logic;
+      document.getElementById('ins-output').textContent = d.output;
+    }
+
+    selectNode('raw');
+  </script>
+</body>
+</html>
